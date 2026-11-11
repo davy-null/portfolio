@@ -1,0 +1,29 @@
+---
+// Generated cover art for entries with no image: a tiny eclipse + skyline, unique per slug.
+import { seeded } from '../data/utils';
+const { seed, hue = 0 } = Astro.props as { seed: string; hue?: number };
+const r = seeded(seed);
+const W = 640, H = 360;
+const cx = 80 + r() * 480, cy = 70 + r() * 90, R = 38 + r() * 40;
+const tone = ['#c8203a', '#8d74d6', '#3b6fd6'][Math.floor(r() * 3)];
+const bld: { x: number; w: number; h: number }[] = [];
+let x = -10;
+while (x < W) { const w = 22 + r() * 46; bld.push({ x, w, h: 40 + r() * 140 }); x += w + 2; }
+const bld2: typeof bld = [];
+x = -30;
+while (x < W) { const w = 30 + r() * 60; bld2.push({ x, w, h: 20 + r() * 90 }); x += w + 3; }
+const id = 'c' + Math.abs([...seed].reduce((a, c) => a + c.charCodeAt(0) * 31, 7));
+---
+<svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" role="img" aria-label="" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id={`${id}s`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#09090d" /><stop offset="1" stop-color="#201432" /></linearGradient>
+    <radialGradient id={`${id}g`}><stop offset="0" stop-color={tone} stop-opacity=".5" /><stop offset="1" stop-color={tone} stop-opacity="0" /></radialGradient>
+    <mask id={`${id}m`}><rect width={W} height={H} fill="#fff" /><circle cx={cx - R * 0.18} cy={cy + R * 0.08} r={R * 0.96} fill="#000" /></mask>
+  </defs>
+  <rect width={W} height={H} fill={`url(#${id}s)`} />
+  <circle cx={cx} cy={cy} r={R * 3} fill={`url(#${id}g)`} />
+  <circle cx={cx} cy={cy} r={R} fill="#07070a" />
+  <circle cx={cx} cy={cy} r={R} fill={tone} mask={`url(#${id}m)`} />
+  {bld2.map((b) => <rect x={b.x} y={H - b.h} width={b.w} height={b.h} fill="#150e20" />)}
+  {bld.map((b) => <rect x={b.x} y={H - b.h * 0.6} width={b.w} height={b.h * 0.6} fill="#09090d" />)}
+</svg>

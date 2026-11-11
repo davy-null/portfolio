@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import AchievementCard from '../components/AchievementCard.astro';
+import { ACHIEVEMENT_CATEGORIES } from '../content.config';
+
+const all = (await getCollection('achievements')).sort((a, b) => +b.data.date - +a.data.date);
+const years = [...new Set(all.map((a) => a.data.date.getUTCFullYear()))];
+const usedCats = Object.entries(ACHIEVEMENT_CATEGORIES).filter(([k]) => all.some((a) => a.data.category === k));
+const sCount = all.filter((a) => a.data.rank === 'S').length;
+---
+<BaseLayout title="Trophies" description="Achievements, certifications, CTF results and milestones.">
+  <PageHead title="Trophies" jp="実績" text="Competitions, certifications, leadership and milestones. Rank S is the rarest." />
+  <section class="wrap" style="padding-block:2.5rem 1rem">
+    <div class="stats">
+      <div><b>{all.length}</b><span>unlocked</span></div>
+      <div><b>{sCount}</b><span>rank S</span></div>
+      <div><b>{usedCats.length}</b><span>categories</span></div>
+      <div><b>{years.length}</b><span>active years</span></div>
+    </div>
+    <div class="chips" id="ach-cats" role="group" aria-label="Filter by category" style="margin-top:1.75rem">
+      <button class="chip" type="button" data-cat="" aria-pressed="true">All</button>
+      {usedCats.map(([k, v]) => <button class="chip" type="button" data-cat={k} aria-pressed="false">{v}</button>)}
+    </div>
+  </section>
+  <section class="wrap" style="padding-bottom:6rem" id="ach-wrap">
+    {years.map((y) => (
+      <div class="year-block">
+        <div class="year" aria-hidden="true">{y}</div>
+        <h2 class="sr-only">{y}</h2>
+        <div class="ach-list">{all.filter((a) => a.data.date.getUTCFullYear() === y).map((a) => <AchievementCard item={a} />)}</div>
+      </div>
+    ))}
+    <p class="empty" id="ach-none" hidden>Nothing unlocked in this category yet.</p>
+  </section>
+  <script>
+    function init() {
+      const wrap = document.getElementById('ach-cats');
+      if (!wrap) return;
+      wrap.onclick = (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLElement>('.chip');
+        if (!b) return;
+        const cat = b.dataset.cat ?? '';
+        wrap.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        document.querySelectorAll<HTMLElement>('.ach').forEach((a) => (a.hidden = !!cat && a.dataset.cat !== cat));
+        document.querySelectorAll<HTMLElement>('.year-block').forEach((y) => (y.hidden = !y.querySelector('.ach:not([hidden])')));
+        (document.getElementById('ach-none') as HTMLElement).hidden = !!document.querySelector('.ach:not([hidden])');
+      };
+    }
+    document.addEventListener('astro:page-load', init);
+  </script>
+</BaseLayout>

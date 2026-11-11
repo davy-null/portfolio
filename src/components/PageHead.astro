@@ -1,0 +1,10 @@
+---
+const { title, jp, text } = Astro.props as { title: string; jp: string; text?: string };
+---
+<section class="page-head">
+  <span class="k" aria-hidden="true">{jp}</span>
+  <div class="wrap" style="position:relative">
+    <h1>{title}</h1>
+    {text && <p>{text}</p>}
+  </div>
+</section>

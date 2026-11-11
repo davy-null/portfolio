@@ -1,0 +1,22 @@
+---
+import { skills } from '../data/profile';
+const SEG = 10;
+---
+<div class="lv">
+  {skills.map((s) => {
+    const filled = Math.floor(s.xp / (100 / SEG));
+    const part = ((s.xp % (100 / SEG)) / (100 / SEG)) * 100;
+    return (
+      <div class="lv-row">
+        <div class="lv-top">
+          <span class="lv-name"><span class="j" aria-hidden="true">{s.jp}</span>{s.name}</span>
+          <span class="lv-num">Lv <b>{s.level}</b> · {s.xp}% to next</span>
+        </div>
+        <div class="bar" role="img" aria-label={`${s.name}: level ${s.level}, ${s.xp} percent to next level`}>
+          {Array.from({ length: SEG }, (_, i) => <i class:list={[i < filled && 'on', i === filled && 'part']} style={i === filled ? `--fill:${part}%` : undefined}></i>)}
+        </div>
+        <span class="lv-note">{s.note}</span>
+      </div>
+    );
+  })}
+</div>

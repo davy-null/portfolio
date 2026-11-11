@@ -1,0 +1,112 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { CATEGORIES } from '../../content.config';
+
+const posts = (await getCollection('writeups', (p) => !p.data.draft)).sort((a, b) => +b.data.date - +a.data.date);
+const featured = posts.filter((p) => p.data.featured).slice(0, 2);
+const tagCount = new Map<string, number>();
+posts.forEach((p) => p.data.tags.forEach((t) => tagCount.set(t, (tagCount.get(t) ?? 0) + 1)));
+const tags = [...tagCount.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([t]) => t);
+const catCounts = Object.keys(CATEGORIES).map((k) => ({ key: k, ...CATEGORIES[k as keyof typeof CATEGORIES], n: posts.filter((p) => p.data.category === k).length }));
+---
+<BaseLayout title="Archive" description="Technical write-ups, CTF notes, tutorials and personal reflections.">
+  <PageHead title="Archive" jp="記録" text="Write-ups, tutorials, CTF notes and reflections. Search, or filter by category and tag." />
+
+  {featured.length > 0 && (
+    <section class="wrap" style="padding-top:2.5rem" id="featured-block" aria-labelledby="feat-h">
+      <h2 id="feat-h" style="font-size:1.4rem;margin-bottom:1rem"><span class="featured-mark"></span>Featured</h2>
+      <div class="manga" style="grid-template-columns:unset" id="featured">
+        <div style="display:grid;gap:1.25rem" class="feat-grid">{featured.map((p) => <ArticleCard post={p} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="wrap">
+    <div class="filters" role="search">
+      <div class="search"><label class="sr-only" for="q">Search write-ups</label><input id="q" type="search" placeholder="Search titles, descriptions and tags" autocomplete="off" /></div>
+      <div>
+        <p class="muted" style="font-size:.85rem;margin-bottom:.5rem" id="cat-l">Category</p>
+        <div class="chips" role="group" aria-labelledby="cat-l" id="cats">
+          <button class="chip" type="button" data-cat="" aria-pressed="true">All ({posts.length})</button>
+          {catCounts.map((c) => <button class="chip" type="button" data-cat={c.key} aria-pressed="false" disabled={c.n === 0}>{c.label} ({c.n})</button>)}
+        </div>
+      </div>
+      <div>
+        <p class="muted" style="font-size:.85rem;margin-bottom:.5rem" id="tag-l">Tags</p>
+        <div class="chips" role="group" aria-labelledby="tag-l" id="tags">
+          {tags.map((t) => <button class="chip" type="button" data-tag={t} aria-pressed="false">#{t}</button>)}
+        </div>
+      </div>
+      <p class="muted" id="count" role="status" aria-live="polite" style="font-size:.9rem"></p>
+    </div>
+
+    <div class="proj-grid" id="list" style="padding-block:2rem 5rem">
+      {posts.map((p) => <ArticleCard post={p} />)}
+    </div>
+    <p class="empty" id="none" hidden>No write-ups match. Clear a filter or try a different search.</p>
+  </section>
+
+  <script>
+    function init() {
+      const list = document.getElementById('list');
+      if (!list) return;
+      const q = document.getElementById('q') as HTMLInputElement;
+      const cards = [...list.querySelectorAll<HTMLElement>('a.panel')];
+      const none = document.getElementById('none')!;
+      const count = document.getElementById('count')!;
+      const state = { q: '', cat: '', tags: new Set<string>() };
+      const params = new URLSearchParams(location.search);
+      state.q = params.get('q') ?? '';
+      state.cat = params.get('cat') ?? '';
+      (params.get('tags') ?? '').split(',').filter(Boolean).forEach((t) => state.tags.add(t));
+      q.value = state.q;
+
+      const apply = () => {
+        const term = state.q.trim().toLowerCase();
+        let shown = 0;
+        cards.forEach((c) => {
+          const tags = (c.dataset.tags ?? '').split('|');
+          const ok =
+            (!term || (c.dataset.title + ' ' + c.dataset.text).includes(term)) &&
+            (!state.cat || c.dataset.cat === state.cat) &&
+            [...state.tags].every((t) => tags.includes(t));
+          c.hidden = !ok;
+          if (ok) shown++;
+        });
+        none.hidden = shown > 0;
+        count.textContent = `${shown} write-up${shown === 1 ? '' : 's'}`;
+        document.querySelectorAll<HTMLElement>('#cats .chip').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.cat ?? '') === state.cat)));
+        document.querySelectorAll<HTMLElement>('#tags .chip').forEach((b) => b.setAttribute('aria-pressed', String(state.tags.has(b.dataset.tag!))));
+        const hasFilter = state.q || state.cat || state.tags.size;
+        const fb = document.getElementById('featured-block');
+        if (fb) fb.hidden = !!hasFilter;
+        const p = new URLSearchParams();
+        if (state.q) p.set('q', state.q);
+        if (state.cat) p.set('cat', state.cat);
+        if (state.tags.size) p.set('tags', [...state.tags].join(','));
+        history.replaceState(history.state, '', location.pathname + (p.size ? '?' + p : ''));
+      };
+      q.oninput = () => { state.q = q.value; apply(); };
+      document.getElementById('cats')!.onclick = (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLElement>('.chip');
+        if (b && !(b as HTMLButtonElement).disabled) { state.cat = b.dataset.cat ?? ''; apply(); }
+      };
+      document.getElementById('tags')!.onclick = (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLElement>('.chip');
+        if (!b) return;
+        const t = b.dataset.tag!;
+        state.tags.has(t) ? state.tags.delete(t) : state.tags.add(t);
+        apply();
+      };
+      apply();
+    }
+    document.addEventListener('astro:page-load', init);
+  </script>
+  <style>
+    .feat-grid { grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .feat-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</BaseLayout>

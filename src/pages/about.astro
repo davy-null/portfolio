@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import SectionHead from '../components/SectionHead.astro';
+import LevelBars from '../components/LevelBars.astro';
+import Radar from '../components/Radar.astro';
+import Emblem from '../components/Emblem.astro';
+import MissionLog from '../components/MissionLog.astro';
+import { site, intro, profileSheet, interests, timeline, philosophy, goals } from '../data/profile';
+---
+<BaseLayout title="Profile" description={`About ${site.name}: background, interests, philosophy and goals.`}>
+  <PageHead title="Profile" jp="人物" text="Who I am, how I got here, and what I'm working toward." />
+
+  <section class="sec wrap">
+    <div class="sheet">
+      <aside class="panel sheet-card" aria-label="Character profile">
+        <div class="sheet-portrait"><Emblem /></div>
+        <dl class="dl">{profileSheet.map((r) => <div><dt>{r.k}</dt><dd>{r.v}</dd></div>)}</dl>
+      </aside>
+      <div>
+        <h2 style="font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:1.25rem">The short version</h2>
+        <div style="display:grid;gap:1rem;max-width:62ch;color:#c9c6d4">
+          <p>{intro.short}</p>
+          {intro.long.map((p) => <p>{p}</p>)}
+        </div>
+        <h3 style="margin:2.5rem 0 1rem;font-size:1.3rem">Interests</h3>
+        <div class="chips">{interests.map((i) => <span class="chip"><span class="jp" style="color:var(--color-crimson-hi)">{i.jp}</span>{i.name}</span>)}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0">
+    <SectionHead title="Level progression" jp="成長" />
+    <div class="two" style="align-items:center">
+      <LevelBars />
+      <Radar />
+    </div>
+    <p class="muted mono" style="margin-top:1.5rem">levels and percentages are placeholders. Edit them in src/data/profile.ts</p>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0">
+    <SectionHead title="The journey" jp="軌跡" />
+    <ol class="timeline">
+      {timeline.map((t, i) => (
+        <li><span class="when">{t.when}</span><h3>{t.title}</h3><p>{t.text}</p></li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0">
+    <div class="two">
+      <div>
+        <SectionHead title="How I learn" jp="心得" />
+        <div class="philo">{philosophy.map((p) => <div><h3>{p.title}</h3><p>{p.text}</p></div>)}</div>
+      </div>
+      <div>
+        <SectionHead title="Where I'm headed" jp="目標" />
+        <ul class="goals">{goals.map((g) => <li>{g}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0;padding-bottom:6rem">
+    <SectionHead title="Mission log" jp="任務" />
+    <MissionLog />
+  </section>
+</BaseLayout>

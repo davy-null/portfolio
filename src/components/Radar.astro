@@ -1,0 +1,14 @@
+---
+import { skills } from '../data/profile';
+const S = 320, c = S / 2, R = 118;
+const n = skills.length;
+const pt = (i: number, v: number) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / n; return [c + Math.cos(a) * R * v, c + Math.sin(a) * R * v]; };
+const poly = (v: (i: number) => number) => skills.map((_, i) => pt(i, v(i)).join(',')).join(' ');
+const max = 20;
+---
+<svg viewBox={`0 0 ${S} ${S}`} role="img" aria-label="Skill radar chart of the six progression areas" style="width:100%;max-width:340px;margin-inline:auto">
+  {[0.25, 0.5, 0.75, 1].map((g) => <polygon points={poly(() => g)} fill="none" stroke="#2c2c3a" />)}
+  {skills.map((_, i) => { const [x, y] = pt(i, 1); return <line x1={c} y1={c} x2={x} y2={y} stroke="#2c2c3a" />; })}
+  <polygon points={poly((i) => skills[i].level / max)} fill="#c8203a" fill-opacity=".28" stroke="#e8344f" stroke-width="1.5" />
+  {skills.map((s, i) => { const [x, y] = pt(i, 1.2); const [px, py] = pt(i, s.level / max); return (<g><circle cx={px} cy={py} r="3" fill="#e8344f" /><text x={x} y={y} fill="#9393a3" font-size="11" text-anchor="middle" dominant-baseline="middle">{s.name.split(' ')[0]}</text></g>); })}
+</svg>

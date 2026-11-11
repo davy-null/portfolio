@@ -1,0 +1,8 @@
+name: Shamba Advisor
+description: AI-powered crop advisory for Kenyan smallholder farmers, delivered over USSD and SMS so it works on any phone. Combines local weather data with crop guidance.
+tech: [Python, Africa's Talking, Open-Meteo, NASA POWER, M-Pesa Daraja]
+repo: https://github.com/davy-null
+status: building
+featured: true
+order: 1
+placeholder: true

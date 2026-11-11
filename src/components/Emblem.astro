@@ -1,0 +1,15 @@
+---
+import { site } from '../data/profile';
+---
+<svg viewBox="0 0 240 260" role="img" aria-label={`${site.handle} emblem: an eclipse inside a hexagon`} style="width:70%">
+  <defs>
+    <radialGradient id="eg"><stop offset="0" stop-color="#c8203a" stop-opacity=".5" /><stop offset="1" stop-color="#c8203a" stop-opacity="0" /></radialGradient>
+    <mask id="em"><rect width="240" height="260" fill="#fff" /><circle cx="108" cy="124" r="46" fill="#000" /></mask>
+  </defs>
+  <circle cx="120" cy="130" r="115" fill="url(#eg)" />
+  <polygon points="120,18 214,72 214,188 120,242 26,188 26,72" fill="none" stroke="#4a4a5c" stroke-width="1.5" />
+  <polygon points="120,40 196,84 196,176 120,220 44,176 44,84" fill="none" stroke="#2c2c3a" />
+  <circle cx="120" cy="130" r="52" fill="#07070a" />
+  <circle cx="120" cy="130" r="52" fill="#c8203a" mask="url(#em)" />
+  <text x="120" y="250" text-anchor="middle" fill="#9393a3" font-family="serif" font-size="13" letter-spacing="3">記録者</text>
+</svg>

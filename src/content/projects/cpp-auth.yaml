@@ -1,0 +1,7 @@
+name: C++ password authentication
+description: A command line login system that salts and hashes passwords with SHA-256 through OpenSSL. Built to understand why plain hashes are not enough.
+tech: [C++, OpenSSL]
+repo: https://github.com/davy-null
+status: shipped
+order: 6
+placeholder: true

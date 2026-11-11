@@ -1,0 +1,5 @@
+---
+import { site } from '../data/profile';
+const { show = false } = Astro.props;
+---
+{show && site.showPlaceholderBadges && <span class="sample" title="Placeholder content. Replace with your own.">sample</span>}

@@ -1,0 +1,30 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { CATEGORIES } from '../content.config';
+import { fmtDate, readingTime } from '../data/utils';
+import ProceduralCover from './ProceduralCover.astro';
+import PlaceholderBadge from './PlaceholderBadge.astro';
+interface Props { post: CollectionEntry<'writeups'>; compact?: boolean }
+const { post, compact = false } = Astro.props;
+const d = post.data;
+const cat = CATEGORIES[d.category];
+---
+<a href={`/writeups/${post.id}/`} class="panel" data-title={d.title.toLowerCase()} data-text={`${d.description} ${d.tags.join(' ')}`.toLowerCase()} data-cat={d.category} data-tags={d.tags.join('|')} style="display:block">
+  {!compact && (
+    <div class="cover">
+      {d.cover ? <Image src={d.cover} alt={d.coverAlt} widths={[400, 700]} sizes="(min-width:900px) 380px, 100vw" /> : <ProceduralCover seed={post.id} />}
+    </div>
+  )}
+  <div class="panel-body">
+    <div class="card-meta">
+      <span class="cat">{cat.jp} {cat.label}</span>
+      <time datetime={d.date.toISOString()}>{fmtDate(d.date)}</time>
+      <span>{readingTime(post.body ?? '')} min read</span>
+      {d.featured && <span><span class="featured-mark"></span>featured</span>}
+      <PlaceholderBadge show={d.placeholder} />
+    </div>
+    <h3 class="card-title">{d.title}</h3>
+    <p class="card-desc">{d.description}</p>
+  </div>
+</a>

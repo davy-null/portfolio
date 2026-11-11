@@ -1,0 +1,7 @@
+---
+const { title, jp, href, linkText } = Astro.props as { title: string; jp: string; href?: string; linkText?: string };
+---
+<div class="sec-head">
+  <div class="sec-title"><span class="k" aria-hidden="true">{jp}</span><h2>{title}</h2></div>
+  {href && <a class="more" href={href}>{linkText ?? 'See all'}</a>}
+</div>

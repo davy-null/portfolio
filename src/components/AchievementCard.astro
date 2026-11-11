@@ -1,0 +1,40 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { ACHIEVEMENT_CATEGORIES } from '../content.config';
+import { fmtDate } from '../data/utils';
+import PlaceholderBadge from './PlaceholderBadge.astro';
+interface Props { item: CollectionEntry<'achievements'> }
+const { item } = Astro.props;
+const a = item.data;
+---
+<article class="panel ach" data-rank={a.rank} data-cat={a.category}>
+  <div class="banner" aria-hidden="true">Achievement unlocked</div>
+  <div class="rank" aria-label={`Rank ${a.rank}`}><span>{a.rank}</span></div>
+  <div>
+    <h3>{a.title} <PlaceholderBadge show={a.placeholder} /></h3>
+    <div class="ach-meta"><span class="cat">{ACHIEVEMENT_CATEGORIES[a.category]}</span><time datetime={a.date.toISOString()}>{fmtDate(a.date, { year: 'numeric', month: 'short' })}</time></div>
+    <p>{a.description}</p>
+    {a.image && <Image src={a.image} alt={a.imageAlt || a.title} widths={[300, 600]} />}
+    {a.link && <a class="ext" href={a.link} rel="noopener">{a.linkLabel}</a>}
+  </div>
+</article>
+<script>
+  // Unlock animation: plays once when a card scrolls into view.
+  function setup() {
+    const cards = document.querySelectorAll<HTMLElement>('.ach:not(.seen)');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!('IntersectionObserver' in window)) { cards.forEach((c) => c.classList.add('seen')); return; }
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const c = e.target as HTMLElement;
+        c.classList.add('seen');
+        if (!reduce) c.classList.add('play');
+        io.unobserve(c);
+      });
+    }, { threshold: 0.35 });
+    cards.forEach((c) => io.observe(c));
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

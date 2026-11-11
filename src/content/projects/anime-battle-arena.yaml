@@ -1,0 +1,8 @@
+name: Anime Battle Arena
+description: A browser battle game with original characters, turn-based combat and a small progression system. A playground for game loops and state management.
+tech: [JavaScript, HTML5 Canvas, CSS]
+repo: https://github.com/davy-null
+status: shipped
+featured: true
+order: 2
+placeholder: true

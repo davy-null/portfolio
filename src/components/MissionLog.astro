@@ -1,0 +1,22 @@
+---
+import { missions } from '../data/profile';
+const cols = [
+  { s: 'active', label: 'In progress', jp: '進行' },
+  { s: 'queued', label: 'Queued', jp: '待機' },
+  { s: 'cleared', label: 'Cleared', jp: '完了' },
+];
+---
+<div class="missions">
+  {cols.map((c) => (
+    <div class="mcol" data-s={c.s}>
+      <h3><span class="j" aria-hidden="true">{c.jp}</span>{c.label}</h3>
+      {missions.filter((m) => m.status === c.s).map((m) => (
+        <div class="m-item">
+          <b>{m.title}</b>
+          <p>{m.detail}</p>
+          <div class="m-prog"><span class="t"><i style={`--p:${m.progress}%`}></i></span>{m.progress}%</div>
+        </div>
+      ))}
+    </div>
+  ))}
+</div>

@@ -1,0 +1,26 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import ProceduralCover from './ProceduralCover.astro';
+import PlaceholderBadge from './PlaceholderBadge.astro';
+interface Props { project: CollectionEntry<'projects'> }
+const { project } = Astro.props;
+const p = project.data;
+---
+<article class="panel lift proj">
+  <div class="cover">
+    {p.screenshot ? <Image src={p.screenshot} alt={p.screenshotAlt || `${p.name} screenshot`} widths={[400, 700]} sizes="(min-width:1040px) 380px, 100vw" /> : <ProceduralCover seed={project.id} />}
+  </div>
+  <div class="panel-body">
+    <div class="card-meta"><span class="status" data-s={p.status}>{p.status}</span><PlaceholderBadge show={p.placeholder} /></div>
+    <h3 class="card-title">{p.name}</h3>
+    <p class="card-desc">{p.description}</p>
+    <div class="tech">{p.tech.map((t) => <span>{t}</span>)}</div>
+    {(p.repo || p.demo) && (
+      <div class="links">
+        {p.repo && <a href={p.repo} rel="noopener">Source on GitHub<span class="sr-only"> for {p.name}</span></a>}
+        {p.demo && <a href={p.demo} rel="noopener">Live demo<span class="sr-only"> of {p.name}</span></a>}
+      </div>
+    )}
+  </div>
+</article>

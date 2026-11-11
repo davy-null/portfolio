@@ -1,0 +1,8 @@
+name: DVWA security assessment
+description: A web application security assessment aligned to the OWASP Top 10, with findings, severity ratings and remediation guidance written for developers.
+tech: [DVWA, Burp Suite, OWASP, Docker]
+repo: https://github.com/davy-null
+status: shipped
+featured: true
+order: 3
+placeholder: true

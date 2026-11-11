@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { socials, contactForm, site } from '../data/profile';
+const links = [
+  { l: 'Email', v: socials.email, h: `mailto:${socials.email}` },
+  { l: 'GitHub', v: socials.github.replace('https://', ''), h: socials.github },
+  { l: 'LinkedIn', v: 'Profile', h: socials.linkedin },
+  ...socials.others.map((o) => ({ l: o.label, v: 'Profile', h: o.url })),
+];
+---
+<BaseLayout title="Signal" description={`Contact ${site.name}: email, social links and a contact form.`}>
+  <PageHead title="Signal" jp="通信" text="Questions, collaborations, or a security problem worth solving. I read everything." />
+  <section class="wrap" style="padding-block:3rem 6rem">
+    <div class="contact-grid">
+      <div>
+        <h2 style="font-size:1.6rem">Find me here</h2>
+        <ul class="contact-links">{links.map((x) => <li><a href={x.h} rel="noopener">{x.l}<span>{x.v}</span></a></li>)}</ul>
+      </div>
+      <form class="panel f" id="cf" data-endpoint={contactForm.endpoint} data-email={socials.email} novalidate>
+        <label>Your name<input name="name" required autocomplete="name" /></label>
+        <label>Email<input name="email" type="email" required autocomplete="email" /></label>
+        <label>Topic
+          <select name="topic"><option>Project or collaboration</option><option>Security question</option><option>Write-up feedback</option><option>Something else</option></select>
+        </label>
+        <label>Message<textarea name="message" required></textarea></label>
+        <label class="hp" aria-hidden="true">Leave empty<input name="website" tabindex="-1" autocomplete="off" /></label>
+        <div><button class="btn primary" type="submit">Send message</button></div>
+        <p class="form-status" id="cf-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+  <script>
+    function init() {
+      const f = document.getElementById('cf') as HTMLFormElement | null;
+      const st = document.getElementById('cf-status');
+      if (!f || !st) return;
+      f.onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(f);
+        if (fd.get('website')) return;
+        const miss = ['name', 'email', 'message'].filter((k) => !String(fd.get(k) ?? '').trim());
+        if (miss.length || !/^\S+@\S+\.\S+$/.test(String(fd.get('email')))) {
+          st.dataset.k = 'err'; st.textContent = miss.length ? `Add your ${miss.join(', ')} to send.` : 'Enter a valid email address.';
+          (f.elements.namedItem(miss[0] ?? 'email') as HTMLElement)?.focus();
+          return;
+        }
+        const endpoint = f.dataset.endpoint;
+        if (endpoint) {
+          st.dataset.k = ''; st.textContent = 'Sending...';
+          try {
+            const r = await fetch(endpoint, { method: 'POST', body: fd, headers: { Accept: 'application/json' } });
+            if (!r.ok) throw new Error();
+            st.dataset.k = 'ok'; st.textContent = 'Message sent. Thank you, I will reply soon.'; f.reset();
+          } catch { st.dataset.k = 'err'; st.textContent = 'Could not send. Email me directly instead.'; }
+        } else {
+          const body = `${fd.get('message')}\n\n${fd.get('name')} (${fd.get('email')})`;
+          location.href = `mailto:${f.dataset.email}?subject=${encodeURIComponent('[' + fd.get('topic') + '] from ' + fd.get('name'))}&body=${encodeURIComponent(body)}`;
+          st.dataset.k = 'ok'; st.textContent = 'Opening your email app with the message ready to send.';
+        }
+      };
+    }
+    document.addEventListener('astro:page-load', init);
+  </script>
+</BaseLayout>

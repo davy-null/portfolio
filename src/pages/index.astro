@@ -1,0 +1,88 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroScene from '../components/HeroScene.astro';
+import SectionHead from '../components/SectionHead.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import AchievementCard from '../components/AchievementCard.astro';
+import { site, intro, skills } from '../data/profile';
+
+const posts = (await getCollection('writeups', (p) => !p.data.draft)).sort((a, b) => +b.data.date - +a.data.date);
+const latest = posts.slice(0, 3);
+const projects = (await getCollection('projects')).filter((p) => p.data.featured).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
+const ach = (await getCollection('achievements')).filter((a) => a.data.featured).sort((a, b) => +b.data.date - +a.data.date).slice(0, 4);
+const focus = [
+  { j: '防衛', n: 'Cybersecurity', d: 'Web app testing, OWASP Top 10, hardening.' },
+  { j: '競技', n: 'CTF and labs', d: 'HackTheBox, TryHackMe, OverTheWire.' },
+  { j: '基盤', n: 'Linux and networking', d: 'The shell, services, TCP/IP.' },
+  { j: '雲', n: 'Cloud', d: 'AWS first, GCP when clients need it.' },
+  { j: '流れ', n: 'DevOps', d: 'Docker, CI/CD, Terraform, Ansible.' },
+  { j: '術式', n: 'Software', d: 'TypeScript, Python, C++.' },
+];
+const personLd = { '@context': 'https://schema.org', '@type': 'Person', name: site.name, alternateName: site.handle, url: Astro.site, jobTitle: 'Developer', address: site.location };
+---
+<BaseLayout intro>
+  <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
+  <section class="hero">
+    <HeroScene />
+    <div class="vtext" aria-hidden="true">{site.taglineJp}</div>
+    <div class="wrap hero-in">
+      <p class="handle">{site.handle}</p>
+      <h1>{site.name}</h1>
+      <p class="tag-line">{site.tagline}</p>
+      <p class="intro-copy">{intro.short}</p>
+      <div class="cta">
+        <a class="btn primary" href="/writeups/">Read the archive</a>
+        <a class="btn" href="/projects/">See the works</a>
+      </div>
+    </div>
+  </section>
+  <div class="hud"><div class="wrap" style="display:flex;flex-wrap:wrap;gap:.5rem 2rem;width:100%">
+    <span><span class="dot"></span>status <b>{site.status}</b></span>
+    <span>base <b>{site.location}</b></span>
+    <span>local time <b id="clock" data-tz={site.timezone}>--:--</b> {site.tzLabel}</span>
+  </div></div>
+
+  <section class="sec wrap" aria-labelledby="focus-h">
+    <SectionHead title="Areas of focus" jp="焦点" />
+    <h2 id="focus-h" class="sr-only">Areas of focus</h2>
+    <div class="focus-grid">
+      {focus.map((f) => <div><span class="j" aria-hidden="true">{f.j}</span><span class="n">{f.n}</span><span class="d">{f.d}</span></div>)}
+    </div>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0">
+    <SectionHead title="Featured works" jp="作品" href="/projects/" linkText="All projects" />
+    <div class="proj-grid">{projects.map((p) => <ProjectCard project={p} />)}</div>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0">
+    <SectionHead title="Latest write-ups" jp="記録" href="/writeups/" linkText="Open the archive" />
+    <div class="manga three">{latest.map((p) => <ArticleCard post={p} />)}</div>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0">
+    <SectionHead title="Selected achievements" jp="実績" href="/achievements/" linkText="All achievements" />
+    <div class="ach-list" data-static>{ach.map((a) => <AchievementCard item={a} />)}</div>
+  </section>
+
+  <section class="sec wrap" style="padding-top:0;padding-bottom:6rem">
+    <div class="panel" style="padding:clamp(1.5rem,4vw,3rem)">
+      <h2 style="font-size:clamp(1.8rem,4vw,2.8rem);max-width:20ch">Currently leveling up in {skills[0].name.toLowerCase()} and cloud.</h2>
+      <p class="muted" style="max-width:52ch;margin-top:.8rem">Follow the progression bars and the live mission log on the profile page.</p>
+      <p style="margin-top:1.5rem"><a class="btn" href="/about/">Open the profile</a></p>
+    </div>
+  </section>
+  <script>
+    function tick() {
+      const el = document.getElementById('clock');
+      if (!el) return;
+      const fmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: el.dataset.tz });
+      const upd = () => (el.textContent = fmt.format(new Date()));
+      upd();
+      setInterval(upd, 15000);
+    }
+    document.addEventListener('astro:page-load', tick);
+  </script>
+</BaseLayout>

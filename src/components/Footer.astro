@@ -1,0 +1,20 @@
+---
+import { nav, site, socials } from '../data/profile';
+---
+<footer class="foot">
+  <div class="wrap foot-in">
+    <div>
+      <a href="/" class="brand"><i></i>{site.handle}</a>
+      <p class="muted" style="margin-top:.6rem;max-width:32ch;font-size:.92rem">{site.taglineJp}。 A personal archive, written as I learn.</p>
+    </div>
+    <ul aria-label="Footer navigation">
+      {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+    <ul aria-label="Social links">
+      <li><a href={socials.github} rel="me noopener">GitHub</a></li>
+      <li><a href={socials.linkedin} rel="me noopener">LinkedIn</a></li>
+    </ul>
+  </div>
+  <div class="wrap" style="margin-top:2rem"><p class="muted mono">© {new Date().getFullYear()} {site.name}. Built with Astro. Artwork is original.</p></div>
+</footer>

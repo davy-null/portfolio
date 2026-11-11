@@ -1,0 +1,51 @@
+---
+import { nav, site } from '../data/profile';
+const { current } = Astro.props;
+const isActive = (href: string) => (href === '/' ? current === '/' : current.startsWith(href));
+---
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="/" class="brand" aria-label={`${site.handle}, home`}><i></i>{site.handle}</a>
+    <nav aria-label="Primary">
+      <div class="nav-links">
+        {nav.map((n) => (
+          <a href={n.href} aria-current={isActive(n.href) ? 'page' : undefined}>
+            <span class="j" aria-hidden="true">{n.jp}</span>
+            <span class="l">{n.label}</span>
+          </a>
+        ))}
+      </div>
+    </nav>
+    <button class="menu-btn" id="menu-open" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
+</header>
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Site menu" data-open="false">
+  <div class="menu-top">
+    <a href="/" class="brand"><i></i>{site.handle}</a>
+    <button class="menu-btn" id="menu-close">Close</button>
+  </div>
+  <ul>
+    {nav.map((n) => (
+      <li><a href={n.href} aria-current={isActive(n.href) ? 'page' : undefined}><span class="j">{n.jp}</span>{n.label}</a></li>
+    ))}
+  </ul>
+</div>
+<script>
+  function setup() {
+    const menu = document.getElementById('menu');
+    const openBtn = document.getElementById('menu-open');
+    const closeBtn = document.getElementById('menu-close');
+    if (!menu || !openBtn || !closeBtn) return;
+    const set = (open: boolean) => {
+      menu.dataset.open = String(open);
+      openBtn.setAttribute('aria-expanded', String(open));
+      document.body.style.overflow = open ? 'hidden' : '';
+      (open ? closeBtn : openBtn).focus();
+    };
+    openBtn.onclick = () => set(true);
+    closeBtn.onclick = () => set(false);
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => { menu.dataset.open = 'false'; document.body.style.overflow = ''; }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.dataset.open === 'true') set(false); });
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

@@ -1,0 +1,81 @@
+---
+// Original artwork: a black eclipse over a procedurally generated night skyline. No third-party assets.
+import { seeded } from '../data/utils';
+const rnd = seeded('kiroku-skyline');
+const W = 1600, H = 900;
+type B = { x: number; w: number; h: number; wins: { x: number; y: number; lit: boolean }[]; ant: number };
+function layer(count: number, minH: number, maxH: number, baseY: number, winChance: number): B[] {
+  const out: B[] = [];
+  let x = -20;
+  while (x < W + 20) {
+    const w = 40 + rnd() * 90;
+    const h = minH + rnd() * (maxH - minH);
+    const wins: B['wins'] = [];
+    if (winChance > 0) {
+      for (let wy = baseY - h + 14; wy < baseY - 12; wy += 16)
+        for (let wx = x + 8; wx < x + w - 10; wx += 14)
+          if (rnd() < winChance) wins.push({ x: wx, y: wy, lit: rnd() < 0.18 });
+    }
+    out.push({ x, w, h, wins, ant: rnd() < 0.2 ? 20 + rnd() * 50 : 0 });
+    x += w + rnd() * 6;
+  }
+  return out;
+}
+const far = layer(0, 120, 330, H, 0);
+const mid = layer(0, 160, 430, H, 0.0);
+const near = layer(0, 120, 360, H, 0.28);
+const particles = Array.from({ length: 14 }, (_, i) => ({ l: 4 + rnd() * 92, t: 40 + rnd() * 55, d: 9 + rnd() * 12, dl: -rnd() * 14, s: i }));
+const ex = 1120, ey = 330, R = 170;
+---
+<div class="hero-scene" aria-hidden="true">
+  <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#09090d" />
+        <stop offset=".55" stop-color="#150f22" />
+        <stop offset="1" stop-color="#2a1230" />
+      </linearGradient>
+      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#c8203a" stop-opacity=".55" />
+        <stop offset=".45" stop-color="#c8203a" stop-opacity=".16" />
+        <stop offset="1" stop-color="#3b2a66" stop-opacity="0" />
+      </radialGradient>
+      <mask id="crescent">
+        <rect width={W} height={H} fill="#fff" />
+        <circle cx={ex - 26} cy={ey + 12} r={R - 6} fill="#000" />
+      </mask>
+      <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#09090d" stop-opacity=".92" />
+        <stop offset=".55" stop-color="#09090d" stop-opacity=".35" />
+        <stop offset="1" stop-color="#09090d" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    <rect width={W} height={H} fill="url(#sky)" />
+    <g class="eclipse-glow">
+      <circle cx={ex} cy={ey} r={R * 2.6} fill="url(#glow)" />
+    </g>
+    <circle cx={ex} cy={ey} r={R} fill="#07070a" />
+    <circle cx={ex} cy={ey} r={R} fill="#c8203a" mask="url(#crescent)" />
+    <circle cx={ex} cy={ey} r={R + 14} fill="none" stroke="#c8203a" stroke-opacity=".35" stroke-width="1" />
+    <circle cx={ex} cy={ey} r={R + 46} fill="none" stroke="#e9e6ef" stroke-opacity=".12" stroke-width="1" stroke-dasharray="2 10" />
+    {far.map((b) => <rect x={b.x} y={H - b.h} width={b.w} height={b.h} fill="#1a1226" />)}
+    {mid.map((b) => (
+      <g>
+        <rect x={b.x} y={H - b.h * 0.85} width={b.w} height={b.h * 0.85} fill="#110c1a" />
+        {b.ant > 0 && <rect x={b.x + b.w / 2} y={H - b.h * 0.85 - b.ant} width="2" height={b.ant} fill="#110c1a" />}
+      </g>
+    ))}
+    {near.map((b) => (
+      <g>
+        <rect x={b.x} y={H - b.h * 0.7} width={b.w} height={b.h * 0.7} fill="#09090d" />
+        {b.ant > 0 && <rect x={b.x + b.w / 3} y={H - b.h * 0.7 - b.ant} width="2" height={b.ant} fill="#09090d" />}
+        {b.ant > 0 && <circle cx={b.x + b.w / 3 + 1} cy={H - b.h * 0.7 - b.ant} r="2.5" fill="#c8203a" class="win" />}
+        {b.wins.map((w) => (
+          <rect x={w.x} y={w.y - b.h * 0.3} width="5" height="7" fill={w.lit ? '#e8344f' : '#e9e6ef'} opacity={w.lit ? 0.9 : 0.12} class={w.lit ? 'win' : undefined} />
+        ))}
+      </g>
+    ))}
+    <rect width={W} height={H} fill="url(#fade)" />
+  </svg>
+  {particles.map((p) => <span class="particle" style={`left:${p.l}%;top:${p.t}%;animation-duration:${p.d}s;animation-delay:${p.dl}s`}></span>)}
+</div>

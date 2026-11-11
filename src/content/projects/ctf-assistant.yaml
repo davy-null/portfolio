@@ -1,0 +1,6 @@
+name: CTF assistant agent
+description: An AI agent that organises challenge notes, tracks what has been tried and suggests the next enumeration step. Keeps a human in the loop.
+tech: [Python, Claude API, SQLite]
+status: building
+order: 4
+placeholder: true
