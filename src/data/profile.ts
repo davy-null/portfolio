@@ -11,7 +11,7 @@ export const site = {
   name: 'Davy',
   handle: 'davy-null',
   // PLACEHOLDER: tagline
-  tagline: 'I read the dark so systems can stay lit.',
+  tagline: 'Uncertainty Is Inherently Unsustainable.Eventually,Everything Either Is Or Isnt.',
   taglineJp: '闇を読み、仕組みを守る',
   description:
     'Personal archive of a cybersecurity and cloud developer in Nairobi: write-ups, CTF notes, projects and milestones.',
